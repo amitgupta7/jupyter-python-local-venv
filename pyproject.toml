@@ -1,0 +1,11 @@
+[project]
+name = "jupyter-python-local-venv"
+version = "0.0.1"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas==2.2.2"
+    ,"plotly==5.22.0"
+    ,"ipykernel==6.29.5"
+    ,"notebook==7.2.2"
+    ,"matplotlib==3.9.2"
+]
