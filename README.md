@@ -70,7 +70,7 @@ make sync
 
 The below error will be thrown if the csv files location is not found (thus the dataframe is empty). Make sure `.dataDir` folder contains csv data. 
 
-* If `.dataDir` folder is empty, see [Other data downloading options](https://github.com/amitgupta7/jupyter-python-local-venv?tab=readme-ov-file#other-data-downloading-options) section (above) to download some data for the date range.
+* If `.dataDir` folder is empty, see [Other data downloading options](#other-data-downloading-options) section (above) to download some data for the date range.
 ```shell
 dataframeLoader.py:46: UserWarning: No matching file found in ../../dataDir for regex: STRUCTURED-*.csv. Empty dataframe will be returned.
   warnings.warn("No matching file found in "+root+" for regex: "+regex+". Empty dataframe will be returned." )
