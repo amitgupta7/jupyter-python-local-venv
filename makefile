@@ -5,3 +5,5 @@ init:
 	. venv/bin/activate && pip install .
 run:
 	. venv/bin/activate && python3 -m notebook
+git:
+	git config http.postBuffer 524288000
