@@ -75,7 +75,6 @@ The below error will be thrown if the csv files location is not found (thus the 
 dataframeLoader.py:46: UserWarning: No matching file found in ../../dataDir for regex: STRUCTURED-*.csv. Empty dataframe will be returned.
   warnings.warn("No matching file found in "+root+" for regex: "+regex+". Empty dataframe will be returned." )
 ...
-NameError: name 'pd' is not defined
 ```
 
 ## Adding dependencies
