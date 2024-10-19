@@ -45,13 +45,17 @@ df = dfl.loadApplianceTimeSeriesData(root, metricsArr, daterange)
 
 # ## Step2: Data Pivoting
 # We now aggregate the data by `appliance_id` (unique identifier for our cluster) and `ts` timestamp, to get different metrics values as separate columns. Notice there are:
-# * 21 metrics 
+# * 21 metrics -> 15 metrics
+#     * Decide between `max` or `avg` values if both are present. 
+#     * We chose to display `avg` values metrics in this case after some trial and error. 
+# 
 # * Tracked every hour
 
 # In[2]:
 
 
 dfp = df.pivot_table(index=['appliance_id','ts'], columns=['metrics'], values='value', aggfunc='sum').reset_index()
+dfp = dfp[dfp.columns.drop(list(dfp.filter(regex='max')))]
 dfp.head()
 
 
@@ -102,7 +106,7 @@ dfc.head()
 # 
 # 2. Plot box chart to visually represent metrics with any correlation (for cutoff as 0.3).  
 # 
-# 3. Decide between `max` or `avg` values if both are present. We chose to display `avg` values metrics in this case. 
+# 3. Decide between `max` or `avg` values if both are present. We chose to display `avg` values metrics in this case after some trial and error. 
 # 
 # ## Final List of metrics 
 # The below table shows the list of `metrics` that are useful with respective correlation `cutoff`. The cut-off values can be interpreted as follows:
@@ -114,26 +118,29 @@ dfc.head()
 # 
 # | 0.9                   | 0.7                   | 0.5                   | 0.3                   |
 # | --------------------- | --------------------- | --------------------- | --------------------- |
-# | linkerq_avg           | linkerq_avg           | linkerq_avg           | linkerq_avg           |
+# | numFilesScanned       | numFilesScanned       | numFilesScanned       | numFilesScanned       |
 # | numberOfChunksScanned | numberOfChunksScanned | numberOfChunksScanned | numberOfChunksScanned |
 # | numberOfColsScanned   | numberOfColsScanned   | numberOfColsScanned   | numberOfColsScanned   |
-# | numFilesScanned       | numFilesScanned       | numFilesScanned       | numFilesScanned       |
-# |                       | scanTime              | scanTime              | scanTime              |
-# |                       | tmp_taskq_avg         | tmp_taskq_avg         | tmp_taskq_avg         |
 # |                       | fileDownloadTimeInHrs | fileDownloadTimeInHrs | fileDownloadTimeInHrs |
-# |                       |                       | avgFileSizeInMB       | avgFileSizeInMB       |
-# |                       |                       | dataScannedinGB       | dataScannedinGB       |
-# |                       |                       | memory_used_avg       | memory_used_avg       |
-# |                       |                       | IdleTimeInHrs         | IdleTimeInHrs         |
+# |                       | scanTime              | scanTime              | scanTime              |
+# |                       |                       | taskq_avg             | taskq_avg             |
 # |                       |                       | cpu_used_avg          | cpu_used_avg          |
+# |                       |                       | dataScannedinGB       | dataScannedinGB       |
+# |                       |                       | avgFileSizeInMB       | avgFileSizeInMB       |
+# |                       |                       | linkerq_avg           | linkerq_avg           |
+# |                       |                       | IdleTimeInHrs         | IdleTimeInHrs         |
 # |                       |                       |                       | uniqPodCount          |
+# |                       |                       |                       | memory_used_avg       |
 # 
 
 # In[4]:
 
 
+import gravis as gv
+import networkx as nx
 corr_vals = [0.9, 0.7, 0.5, 0.3]
 line = set()
+graph_arr = []
 for cutoff in corr_vals:
     arr = []
     for metr in dfc.metric.unique():
@@ -142,10 +149,9 @@ for cutoff in corr_vals:
         dfcm = dfcm.drop(metr, axis=1)
         dfcm = dfcm.dropna(axis = 0, how = 'all')
         dfcm = dfcm.loc[:, dfcm.median() > cutoff]
-        [arr.append(x) for x in dfcm.columns]
-        # dfcm = dfcm.dropna(axis = 1,thresh=getMiniumValidValues(dfcm, pct=10, ceiling=10))
-        # display(dfcm)
-        # break
+        for x in dfcm.columns:
+            arr.append(x)
+            graph_arr.append((metr, x))
         if(cutoff == 0.3):
             if len(dfcm.columns) > 0:
                 title=f'''Absolute correlation vs percent-change of {metr}
@@ -156,9 +162,14 @@ for cutoff in corr_vals:
                         ,title=title
                         ,colormap='tab20'
                         )
-    for met in set(arr):
-        if("max" not in met):
-            line.add(met)
-    print(cutoff, line)
 
+    print(cutoff, set(arr))
+
+g = nx.DiGraph()
+g.add_edges_from(graph_arr)
+gv.vis(g
+       , graph_height=500
+       , zoom_factor=2
+       , layout_algorithm_active=False
+       )
 
