@@ -4,6 +4,20 @@ Setup local venv with dependencies to run jupyter notebooks.
 * Require `python >= 3.5`.
 * Tested with `3.9.20`. 
 
+## Prerequisites
+The script needs `make` and `python` to run. These can be installed using a packet manager like apt (linux) or using homebrew (mac).
+
+NOTE: These are mac instructions (with homebrew). Provided as-is. 
+```shell
+#install homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+## install make
+brew install make
+## python --version
+## Install python (if not present)
+brew install python@3.9
+```
+
 ## Usage
 
 ```shell
