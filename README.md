@@ -33,8 +33,8 @@ make
 make init
 ## Authenticate with aws sso (browser link). 
 make auth 
-## Call sync. Data will be downloaded to .dataDir
-make sync
+## Call sync for date range. Data will be downloaded to .dataDir
+make sync-ndays DAYS="2024-09-26 2024-10-03"
 ## Start Jupyter server
 make run
 ## Opens browser with localhost url.
@@ -52,6 +52,18 @@ make nbupdate
 cd examples/timeseries\ reporting/
 make nbupdate
 ## This will run the updated notebook and generate the python, html and pdf files for offline consumption.
+```
+## Other data downloading options
+
+Using `sync-ndays` for data download is preffered, since it excludes many of the unused metrics from prometheus, thus saving disk space and network bandwidth. Using `sync` will lead to 10s of GBs of downloads. 
+```shell
+## Data will be downloaded to .dataDir
+## Download data for date range. 
+make sync-ndays DAYS="2024-09-26 2024-10-03"
+## Download data for past 20 days
+make sync-ndays DAYS=20
+## Download all data (very large dataset, 20GB+)
+make sync
 ```
 
 ## Troubleshooting

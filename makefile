@@ -1,4 +1,6 @@
 $(VERBOSE).SILENT:
+DAYS ?= 7
+VENV=". ./venv/bin/activate"
 usage:
 	echo "USAGE:"
 	echo "make init		Install prerequisite libs."
@@ -6,17 +8,22 @@ usage:
 	echo "make sync		Download/sync csv reports to ./.dataDir"
 	echo "make run		Start Jupyter server"
 init: venv
-	. venv/bin/activate && pip install --upgrade build
-	. venv/bin/activate && python -m build 
-	. venv/bin/activate && pip install .
+	eval ${VENV} && pip install --upgrade build
+	eval ${VENV} && python -m build 
+	eval ${VENV} && pip install .
 run: venv
-	. venv/bin/activate && python3 -m notebook
+	eval ${VENV} && python3 -m notebook
 git:
 	git config http.postBuffer 524288000
 sync: venv
 	mkdir -p .dataDir
-	. venv/bin/activate && bash -c 'awscliv2 s3 sync --size-only s3://securiti-cx-exports/cx/ .dataDir'
+	eval ${VENV} && bash -c 'python -m awscliv2 s3 sync --size-only s3://securiti-cx-exports/cx/ .dataDir'
 auth: venv
-	. venv/bin/activate && AWS_CONFIG_FILE=aws-data-sync/config  bash -c 'awscliv2 sso login --no-browser'
+	awsv2 --install
+	eval ${VENV} && AWS_CONFIG_FILE=aws-data-sync/config  bash -c 'python -m awscliv2 sso login --no-browser'
 venv:
 	test -d venv || python3 -m venv venv
+sync-ndays:
+	mkdir -p .dataDir
+	echo "syncing files for days: ${DAYS}."
+	eval ${VENV} && bash -c "python -m awscliv2 s3 sync --size-only `python3 util/awsExcludeStrGenerator.py ${DAYS}` s3://securiti-cx-exports/cx/ .dataDir"

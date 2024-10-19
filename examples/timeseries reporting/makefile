@@ -1,6 +1,7 @@
 fileName=support-reporting-level1.ipynb
+VENV=". ../../venv/bin/activate"
 nbupdate:
-	. ../../venv/bin/activate && jupyter nbconvert --execute --to notebook --inplace ${fileName}
-	. ../../venv/bin/activate && jupyter nbconvert --to python ${fileName}
-	. ../../venv/bin/activate && jupyter nbconvert --to html ${fileName}
-	. ../../venv/bin/activate && jupyter nbconvert --to pdf ${fileName}
+	eval ${VENV} && jupyter nbconvert --execute --to notebook --inplace ${fileName}
+	eval ${VENV} && jupyter nbconvert --to python ${fileName}
+	eval ${VENV} && jupyter nbconvert --to html ${fileName}
+	eval ${VENV} && jupyter nbconvert --to pdf ${fileName}
