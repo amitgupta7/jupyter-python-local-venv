@@ -1,8 +1,9 @@
 # jupyter-python-local-venv
 ## Provided as-is (w/o support)
 Setup local venv with dependencies to run jupyter notebooks. 
+* Require `make`
 * Require `python >= 3.5`.
-* Tested with `3.9.20`. 
+  * Tested with `3.9.20`. 
 
 ## Prerequisites
 The script needs `make` and `python` to run. These can be installed using a packet manager like apt (linux) or using homebrew (mac).
