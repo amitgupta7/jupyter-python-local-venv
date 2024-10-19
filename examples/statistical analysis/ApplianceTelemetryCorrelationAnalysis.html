@@ -7538,13 +7538,16 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">dataframeLoader</span> <span class="k">as</span> <span class="nn">dfl</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'../'</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">dataframeLoader</span> <span class="k">as</span> <span class="nn">dfl</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">reload</span> 
 <span class="n">reload</span><span class="p">(</span><span class="n">dfl</span><span class="p">)</span>
 
 <span class="c1"># Provide csv data location and appliance and timerange information.</span>
-<span class="n">root</span> <span class="o">=</span> <span class="s1">'.dataDir'</span>
+<span class="n">root</span> <span class="o">=</span> <span class="s1">'../../.dataDir'</span>
 <span class="n">fromDt</span> <span class="o">=</span> <span class="s1">'2024-08-15'</span>
 <span class="n">toDt</span> <span class="o">=</span> <span class="s1">'2024-10-15'</span>
 
@@ -8261,16 +8264,16 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>0.9 {'numFilesScanned', 'linkerq_avg', 'numberOfChunksScanned', 'numberOfColsScanned'}
-0.7 {'scanTime', 'linkerq_avg', 'tmp_taskq_avg', 'numFilesScanned', 'numberOfColsScanned', 'numberOfChunksScanned', 'fileDownloadTimeInHrs'}
-0.5 {'scanTime', 'IdleTimeInHrs', 'linkerq_avg', 'tmp_taskq_avg', 'numFilesScanned', 'cpu_used_avg', 'memory_used_avg', 'numberOfColsScanned', 'numberOfChunksScanned', 'fileDownloadTimeInHrs', 'taskq_avg', 'avgFileSizeInMB', 'dataScannedinGB'}
+<pre>0.9 {'linkerq_avg', 'numberOfChunksScanned', 'numberOfColsScanned', 'numFilesScanned'}
+0.7 {'fileDownloadTimeInHrs', 'numberOfColsScanned', 'scanTime', 'linkerq_avg', 'tmp_taskq_avg', 'numberOfChunksScanned', 'numFilesScanned'}
+0.5 {'fileDownloadTimeInHrs', 'memory_used_avg', 'numberOfColsScanned', 'scanTime', 'dataScannedinGB', 'IdleTimeInHrs', 'linkerq_avg', 'avgFileSizeInMB', 'tmp_taskq_avg', 'numberOfChunksScanned', 'cpu_used_avg', 'taskq_avg', 'numFilesScanned'}
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>0.3 {'scanTime', 'IdleTimeInHrs', 'linkerq_avg', 'tmp_taskq_avg', 'numFilesScanned', 'cpu_used_avg', 'memory_used_avg', 'numberOfColsScanned', 'numberOfChunksScanned', 'fileDownloadTimeInHrs', 'taskq_avg', 'uniqPodCount', 'avgFileSizeInMB', 'dataScannedinGB'}
+<pre>0.3 {'fileDownloadTimeInHrs', 'memory_used_avg', 'numberOfColsScanned', 'scanTime', 'dataScannedinGB', 'IdleTimeInHrs', 'uniqPodCount', 'linkerq_avg', 'avgFileSizeInMB', 'tmp_taskq_avg', 'numberOfChunksScanned', 'cpu_used_avg', 'taskq_avg', 'numFilesScanned'}
 </pre>
 </div>
 </div>

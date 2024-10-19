@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[12]:
+# ## load data
+# * `root`: location of the csv files.
+# * `fromDt` and `toDt` are start and end dates for range
 
+# In[1]:
+
+
+import sys
+sys.path.append('../')
 
 import dataframeLoader as dfl
 import pandas as pd
@@ -12,7 +19,6 @@ reload(dfl)
 
 # Provide csv data location and appliance and timerange information.
 root = '../../.dataDir'
-appliance_id='58e98e10-1b19-4c84-93c0-db2ad5903b80'
 fromDt = '2024-09-26'
 toDt = '2024-10-03'
 
@@ -27,6 +33,14 @@ metricsArr = ['cpu_used'
 daterange=[fromDt, toDt]
 df = dfl.loadApplianceTimeSeriesData(root, metricsArr, daterange)
 
+
+# ## Generate plotly report
+# * `appliance_id`: unique identifier of the appliance.
+
+# In[2]:
+
+
+appliance_id='58e98e10-1b19-4c84-93c0-db2ad5903b80'
 dfp = df[(df['appliance_id'] == appliance_id)]
 # Get Full list of metrics in dataframe
 # metrics_category_order = list(dfp.metrics.unique())
@@ -37,7 +51,7 @@ metrics_category_order = [
             ,"scanTime", "fileDownloadTimeInHrs","uniqPodCount"
             ,"numFilesScanned", "avgFileSizeInMB", "IdleTimeInHrs"
             ,"cpu_used_avg", "memory_used_avg"
-            ,"taskq_max","tmp_taskq_avg"
+            ,"taskq_max","tmp_taskq_avg", "linkerq_avg"
              ]
 
 title = 'Appliance plot for appliance_id '+appliance_id+' between '+fromDt+' and '+toDt

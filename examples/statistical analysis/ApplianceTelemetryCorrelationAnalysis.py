@@ -19,13 +19,16 @@
 # In[1]:
 
 
+import sys
+sys.path.append('../')
+
 import dataframeLoader as dfl
 import pandas as pd
 from importlib import reload 
 reload(dfl)
 
 # Provide csv data location and appliance and timerange information.
-root = '.dataDir'
+root = '../../.dataDir'
 fromDt = '2024-08-15'
 toDt = '2024-10-15'
 
