@@ -11,4 +11,5 @@ dependencies = [
     ,"gravis==0.1.0"
     ,"networkx==3.2.1"
     ,"awscliv2==2.3.1"
-]
+    ,"selenium==4.25.0"
+    ]

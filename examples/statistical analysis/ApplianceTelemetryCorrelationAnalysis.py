@@ -29,15 +29,15 @@ reload(dfl)
 
 # Provide csv data location and appliance and timerange information.
 root = '../../.dataDir'
-fromDt = '2024-08-15'
-toDt = '2024-10-15'
+fromDt = '2024-06-01'
+toDt = '2024-11-01'
 
 # Provide list of prometheus metrics to load. 
-# metricsArr = ['cpu_used', 'download_workers_count', 'memory_used', 'task_queue_length', 'infra_access_latency', 'pod_cpu_usage', 'pod_memory_usage'] 
-metricsArr = ['cpu_used'
-              ,'task_queue_length'
-              , 'memory_used'
-              ]
+metricsArr = ['cpu_used', 'download_workers_count', 'memory_used', 'task_queue_length', 'infra_access_latency', 'pod_cpu_usage', 'pod_memory_usage'] 
+# metricsArr = ['cpu_used'
+#               ,'task_queue_length'
+#               , 'memory_used'
+#               ]
 
 daterange=[fromDt, toDt]
 df = dfl.loadApplianceTimeSeriesData(root, metricsArr, daterange)
@@ -45,18 +45,36 @@ df = dfl.loadApplianceTimeSeriesData(root, metricsArr, daterange)
 
 # ## Step2: Data Pivoting
 # We now aggregate the data by `appliance_id` (unique identifier for our cluster) and `ts` timestamp, to get different metrics values as separate columns. Notice there are:
-# * 21 metrics -> 15 metrics
+# * Statistical significance (consider correlation for appliances with atleast 30 non-zero scan time values, ie the appliance should be scanning for atleast 30 hours before considering it statistically significant).
+#     * 200+ appliances
+#     * Total scanning time of over 15 years!!
+# 
+# * 33 metrics -> 22 metrics
 #     * Decide between `max` or `avg` values if both are present. 
-#     * We chose to display `avg` values metrics in this case after some trial and error. 
+#     * We chose to display `avg` values metrics in this case after some trial and error.
+#         * Except for memory (where max indicates spikes/oom conditions better) 
 # 
 # * Tracked every hour
 
 # In[2]:
 
 
+#consider only appliances with a certain number of scanning intervals.
+min_scanning_intervals = 10
 dfp = df.pivot_table(index=['appliance_id','ts'], columns=['metrics'], values='value', aggfunc='sum').reset_index()
-dfp = dfp[dfp.columns.drop(list(dfp.filter(regex='max')))]
-dfp.head()
+max_list = list(dfp.filter(regex='max'))
+# maxlist = ['cpu_used_max', 'linkerq_max', 'memory_used_avg', 'taskq_max', 'tmp_taskq_max']
+# we would like to use max memory (to indicate spikes/oom conditions)
+max_list = list(map(lambda x: x.replace('memory_used_max', 'memory_used_avg'), max_list))
+print('cols removed', max_list)
+dfp = dfp[dfp.columns.drop(max_list)]
+stat_sig = dfp.fillna(0).groupby(['appliance_id']).scanTime.agg(lambda x: x.ne(0).sum())
+stat_sig = stat_sig[stat_sig > min_scanning_intervals].sort_values(ascending=False)
+print('cols retained', dfp.columns)
+print(len(stat_sig), 'statistically significant appliances with total scan time of', stat_sig.sum()/24/365, 'years')
+dfp = dfp[dfp.appliance_id.isin(stat_sig.index)]
+
+display(dfp)
 
 
 # ## Step 3: Data transformation and correlation
@@ -96,50 +114,38 @@ dfc.head()
 # We now iterate over each `metric`, to see if there is any significant statistical correlation to be found across `appliance_id`s. This is done with two steps:
 # 
 # 1. Removing outliers:
-#     * Remove any metrics with `mean correlation value below the cut-off`. The cut-off can be varied for depending on use cases:
+#     * Remove any metrics with `3rd quantile correlation value below the cut-off`. This cut-off can be varied for depending on use cases:
 #         * 0.9 for Exec Dashboards
-#         * 0.7 for Customer Ops
-#         * 0.5 for L1 - support
-#         * 0.3 for L2 - suport 
+#         * 0.8 for Customer Ops
+#         * 0.7 for L1 - support
+#         * 0.6 for L2 - suport 
 # 
-# Please note that we are filtering metrics with `mean` correlation below the `low cut-off`. This ensures that atleast half of the values are correlated to reduce outliers.
+# Please note that we are filtering metrics with `3rd quantile` correlation below the `moderate cut-off`. This ensures that atleast 25% of the values are correlated to reduce outliers.
 # 
 # 2. Plot box chart to visually represent metrics with any correlation (for cutoff as 0.3).  
 # 
-# 3. Decide between `max` or `avg` values if both are present. We chose to display `avg` values metrics in this case after some trial and error. 
+# 3. The network graph indicates specific correlation edges between metrics.
 # 
 # ## Final List of metrics 
 # The below table shows the list of `metrics` that are useful with respective correlation `cutoff`. The cut-off values can be interpreted as follows:
+# 
 # * below 0.3     negligible correlation
 # * 0.3 to 0.5    Low positive (negative) correlation
 # * 0.5 to 0.7    Moderate positive (negative) correlation
 # * 0.7 to 0.9    High positive (negative) correlation
 # * 0.9 to 0.1    Very High positive (negative) correlation
 # 
-# | 0.9                   | 0.7                   | 0.5                   | 0.3                   |
-# | --------------------- | --------------------- | --------------------- | --------------------- |
-# | numFilesScanned       | numFilesScanned       | numFilesScanned       | numFilesScanned       |
-# | numberOfChunksScanned | numberOfChunksScanned | numberOfChunksScanned | numberOfChunksScanned |
-# | numberOfColsScanned   | numberOfColsScanned   | numberOfColsScanned   | numberOfColsScanned   |
-# |                       | fileDownloadTimeInHrs | fileDownloadTimeInHrs | fileDownloadTimeInHrs |
-# |                       | scanTime              | scanTime              | scanTime              |
-# |                       |                       | taskq_avg             | taskq_avg             |
-# |                       |                       | cpu_used_avg          | cpu_used_avg          |
-# |                       |                       | dataScannedinGB       | dataScannedinGB       |
-# |                       |                       | avgFileSizeInMB       | avgFileSizeInMB       |
-# |                       |                       | linkerq_avg           | linkerq_avg           |
-# |                       |                       | IdleTimeInHrs         | IdleTimeInHrs         |
-# |                       |                       |                       | uniqPodCount          |
-# |                       |                       |                       | memory_used_avg       |
-# 
 
 # In[4]:
 
 
 import gravis as gv
+import itertools
 import networkx as nx
-corr_vals = [0.9, 0.7, 0.5, 0.3]
-line = set()
+from IPython.display import Image
+
+corr_vals = [0.6, 0.7, 0.8, 0.9]
+mtrx_arr = []
 graph_arr = []
 for cutoff in corr_vals:
     arr = []
@@ -148,28 +154,36 @@ for cutoff in corr_vals:
         dfcm = dfcm.drop('metric', axis=1)
         dfcm = dfcm.drop(metr, axis=1)
         dfcm = dfcm.dropna(axis = 0, how = 'all')
-        dfcm = dfcm.loc[:, dfcm.median() > cutoff]
+        dfcm = dfcm.loc[:, dfcm.quantile(q=0.75) > cutoff]
         for x in dfcm.columns:
             arr.append(x)
             graph_arr.append((metr, x))
-        if(cutoff == 0.3):
+        if(cutoff == corr_vals[0]):
             if len(dfcm.columns) > 0:
                 title=f'''Absolute correlation vs percent-change of {metr}
                 (For median correlation greater than {cutoff})
                 '''
-                dfcm.plot(kind='box'
-                        ,vert=False
-                        ,title=title
-                        ,colormap='tab20'
-                        )
+                dfcm.plot(kind='box',vert=False,title=title,colormap='tab20')
+    arr = list(set(arr))
+    arr.insert(0,cutoff)
+    mtrx_arr.append(arr)
 
-    print(cutoff, set(arr))
+display(pd.DataFrame(list(map(list, itertools.zip_longest(*mtrx_arr, fillvalue="")))))
 
 g = nx.DiGraph()
 g.add_edges_from(graph_arr)
-gv.vis(g
-       , graph_height=500
+fig = gv.d3(g
+       , graph_height=800
+       , use_node_size_normalization=True
        , zoom_factor=2
-       , layout_algorithm_active=False
+       , node_size_normalization_max=30
+      ,use_edge_size_normalization=True
+      ,use_collision_force=True
+      ,node_label_size_factor=0.8
+       , layout_algorithm_active=True
        )
+fig.export_jpg('graph2.jpg', overwrite=True)
+print("Correlation graph between appliance metrics")
+Image('graph2.jpg')
+# fig.display()
 
