@@ -18,6 +18,14 @@ brew install make
 ## Install python (if not present)
 brew install python@3.9
 ```
+Ubuntu-server-22.04 Instrucutions
+```
+sudo apt update
+sudo apt install make
+sudo apt install python3.9 python3.9-venv
+python --version
+## you may have to se the correct python version binary to path. 
+```
 
 ## Usage
 
