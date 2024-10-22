@@ -23,7 +23,6 @@ auth: venv
 	test -f ~/.aws/config && cmp ~/.aws/config aws-data-sync/config || mv ~/.aws/config ~/.aws/config.bak
 	cp aws-data-sync/config ~/.aws
 	eval ${VENV} && bash -c 'python -m awscliv2 sso login --no-browser'
-	test -f ~/.aws/config.bak && mv ~/.aws/config.bak ~/.aws/config
 venv:
 	test -d venv || python3 -m venv venv
 sync-ndays:
