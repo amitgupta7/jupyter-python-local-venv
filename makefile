@@ -20,6 +20,7 @@ sync: venv
 	eval ${VENV} && bash -c 'python -m awscliv2 s3 sync --size-only s3://securiti-cx-exports/cx/ .dataDir'
 auth: venv
 	mkdir -p ~/.aws
+	test -f ~/.aws/config && cmp ~/.aws/config aws-data-sync/config || mv ~/.aws/config ~/.aws/config.bak
 	cp aws-data-sync/config ~/.aws
 	eval ${VENV} && bash -c 'python -m awscliv2 sso login --no-browser'
 venv:
