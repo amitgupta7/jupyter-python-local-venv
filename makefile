@@ -19,7 +19,9 @@ sync: venv
 	mkdir -p .dataDir
 	eval ${VENV} && bash -c 'python -m awscliv2 s3 sync --size-only s3://securiti-cx-exports/cx/ .dataDir'
 auth: venv
-	eval ${VENV} && AWS_CONFIG_FILE=aws-data-sync/config  bash -c 'python -m awscliv2 sso login --no-browser'
+	mkdir -p ~/.aws
+	cp aws-data-sync/config ~/.aws
+	eval ${VENV} && bash -c 'python -m awscliv2 sso login --no-browser'
 venv:
 	test -d venv || python3 -m venv venv
 sync-ndays:
