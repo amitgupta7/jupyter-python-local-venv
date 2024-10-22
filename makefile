@@ -15,17 +15,21 @@ run: venv
 	eval ${VENV} && python3 -m notebook
 git:
 	git config http.postBuffer 524288000
-sync: venv
+sync: preflight
 	mkdir -p .dataDir
-	eval ${VENV} && bash -c 'python -m awscliv2 s3 sync --size-only s3://securiti-cx-exports/cx/ .dataDir'
-auth: venv
+	aws s3 sync --size-only s3://securiti-cx-exports/cx/ .dataDir 
+auth: preflight
 	mkdir -p ~/.aws
 	test -f ~/.aws/config && cmp ~/.aws/config aws-data-sync/config || mv ~/.aws/config ~/.aws/config.bak
 	cp aws-data-sync/config ~/.aws
-	eval ${VENV} && bash -c 'python -m awscliv2 sso login --no-browser'
+	aws sso login --no-browser 
 venv:
 	test -d venv || python3 -m venv venv
-sync-ndays:
+sync-ndays: preflight
 	mkdir -p .dataDir
 	echo "syncing files for days: ${DAYS}."
-	eval ${VENV} && bash -c "python -m awscliv2 s3 sync --size-only `python3 util/awsExcludeStrGenerator.py ${DAYS}` s3://securiti-cx-exports/cx/ .dataDir"
+	aws s3 sync --size-only `python3 util/awsExcludeStrGenerator.py ${DAYS}` s3://securiti-cx-exports/cx/ .dataDir 
+preflight:
+	echo "checking ..."
+	type aws >/dev/null 2>&1 || { echo >&2 "aws-cli is not installed.  See https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html for steps."; exit 1; }
+	echo "aws-cli is installed."

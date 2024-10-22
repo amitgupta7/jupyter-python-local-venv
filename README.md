@@ -2,6 +2,7 @@
 ## Provided as-is (w/o support)
 Setup local venv with dependencies to run jupyter notebooks. 
 * Require `make`
+* Require `awscli` version 2. see instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). 
 * Require `python >= 3.5`.
   * Tested with `3.9.20`. 
 
@@ -14,17 +15,12 @@ NOTE: These are mac instructions (with homebrew). Provided as-is.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ## install make
 brew install make
-## python --version
+## Install awscli
+curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+sudo installer -pkg AWSCLIV2.pkg -target /
+## python3 --version
 ## Install python (if not present)
-brew install python@3.9
-```
-Ubuntu-server-22.04 Instrucutions
-```
-sudo apt update
-sudo apt install make
-sudo apt install python3.9 python3.9-venv
-python --version
-## you may have to se the correct python version binary to path. 
+## brew install python@3.12
 ```
 
 ## Usage
