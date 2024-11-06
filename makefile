@@ -6,6 +6,7 @@ usage:
 	echo "make init		Install prerequisite libs."
 	echo "make auth		Authenticate aws cli with web sso."
 	echo "make sync		Download/sync csv reports to ./.dataDir"
+	echo "make sync-ndays		Sync between date range. See readme for details."
 	echo "make run		Start Jupyter server"
 init: venv
 	eval ${VENV} && pip install --upgrade build
