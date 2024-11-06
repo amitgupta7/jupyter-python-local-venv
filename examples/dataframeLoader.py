@@ -58,19 +58,20 @@ def checkDateRangeFromFileName(daterange, name):
         return True
     return False
     
-def plotMetricsFacetForApplianceId(dfp, ttl, cat_order):
+def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
     # dfp = fill_timeseries_zero_values(dfp)
     dfp = dfp[(dfp['metrics'].isin(cat_order))].drop_duplicates()
     cat_order_overlap = sorted(set(cat_order).intersection(dfp.metrics.unique()),key=lambda x:cat_order.index(x))
-
+    dfp.rename(columns={colorCol:ledgend}, inplace=True)
     fig = px.bar(dfp, 
                  x='ts', 
                  y="value", 
-                 color='node_ip',
-                 pattern_shape="node_ip",
-                 facet_row='metrics', 
+                 color=ledgend,
+                 pattern_shape=ledgend,
+                 facet_col='metrics', 
+                 facet_col_wrap=1,
                  height=dfp['metrics'].unique().size*200, 
-                 facet_row_spacing=0.005, 
+                 facet_row_spacing=0.02, 
                  text_auto='.2s',
                  color_discrete_sequence=px.colors.qualitative.Alphabet, 
                  category_orders={"metrics": cat_order_overlap}, 
@@ -91,6 +92,8 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order):
                 range=[dfp['ts'].min(), dfp['ts'].min() + dt.timedelta(days=1)]
                 )
             )
+    fig = fig.update_yaxes(side='left', showticklabels=True, title='')
+    fig.update_layout(plot_bgcolor="black", font_color='white', paper_bgcolor='black')
     return fig
 
 def fill_timeseries_zero_values(dfp):

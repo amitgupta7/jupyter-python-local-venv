@@ -40,6 +40,7 @@ df = dfl.loadApplianceTimeSeriesData(root, metricsArr, daterange)
 # In[2]:
 
 
+reload(dfl)
 appliance_id='58e98e10-1b19-4c84-93c0-db2ad5903b80'
 dfp = df[(df['appliance_id'] == appliance_id)]
 # Get Full list of metrics in dataframe
@@ -55,8 +56,6 @@ metrics_category_order = [
              ]
 
 title = 'Appliance plot for appliance_id '+appliance_id+' between '+fromDt+' and '+toDt
-fig  = dfl.plotMetricsFacetForApplianceId(dfp, title, metrics_category_order)
-
-fig.update_layout(plot_bgcolor="black", font_color='white', paper_bgcolor='black')
+fig  = dfl.plotMetricsFacetForApplianceId(dfp, title, metrics_category_order, 'node_ip', 'GraphColor')
 fig.show()
 
