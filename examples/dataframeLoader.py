@@ -72,7 +72,8 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
                  facet_col_wrap=1,
                  height=dfp['metrics'].unique().size*200, 
                  facet_row_spacing=0.02, 
-                 text_auto='.2s',
+                #  text_auto=True,
+                 text_auto='.1f',
                  color_discrete_sequence=px.colors.qualitative.Alphabet, 
                  category_orders={"metrics": cat_order_overlap}, 
                  title=ttl
@@ -117,7 +118,7 @@ def loadStrucDataFromFileRegex(root, regex, **kwargs):
     numFilesScanned=('numberOfTablesScanned', 'sum'), \
     numberOfColsScanned=('numberOfColsScanned', 'sum'), \
     uniqPodCount=('uniqPodCount', 'max'), \
-    scanTime=('processingTimeinHrs', 'sum'), \
+    scanTimeInHrs=('processingTimeinHrs', 'sum'), \
     IdleTimeInHrs=('IdleTimeInHrs', 'sum'), \
     numberOfChunksScanned=('numberOfChunksScanned', 'max')).reset_index()
     df9['ts']=pd.to_datetime(df9['ts'],unit='ms')
@@ -154,7 +155,7 @@ def loadUnstrucDataFromFileRegex(root, regex, **kwargs):
     # df9.rename(columns={'ds':'node_ip'}, inplace=True)
     df9=df9.groupby(['appliance_id', 'ts', 'node_ip']).agg(\
     dataScannedinGB=('dataScannedInGB', 'sum'), \
-    scanTime=('processingTimeinHrs', 'sum'), \
+    scanTimeInHrs=('processingTimeinHrs', 'sum'), \
     IdleTimeInHrs=('IdleTimeInHrs', 'sum'), \
     numFilesScanned=('numberOfFilesScanned', 'sum'), \
     uniqPodCount=('uniqPodCount', 'max')).reset_index()

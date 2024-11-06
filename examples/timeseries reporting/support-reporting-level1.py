@@ -49,7 +49,7 @@ dfp = df[(df['appliance_id'] == appliance_id)]
 metrics_category_order = [
             "dataScannedinGB"
             ,"numberOfColsScanned", "numberOfChunksScanned"
-            ,"scanTime", "fileDownloadTimeInHrs","uniqPodCount"
+            ,"scanTimeInHrs", "fileDownloadTimeInHrs","uniqPodCount"
             ,"numFilesScanned", "avgFileSizeInMB", "IdleTimeInHrs"
             ,"cpu_used_avg", "memory_used_avg"
             ,"taskq_max","tmp_taskq_avg", "linkerq_avg"
