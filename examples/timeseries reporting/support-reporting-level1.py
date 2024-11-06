@@ -20,7 +20,7 @@ reload(dfl)
 # Provide csv data location and appliance and timerange information.
 root = '../../.dataDir'
 fromDt = '2024-09-26'
-toDt = '2024-10-03'
+toDt = '2024-10-05'
 
 # Provide list of prometheus metrics to load. 
 # metricsArr = ['cpu_used', 'download_workers_count', 'memory_used', 'task_queue_length', 'infra_access_latency', 'pod_cpu_usage', 'pod_memory_usage'] 
@@ -52,7 +52,7 @@ metrics_category_order = [
             ,"scanTimeInHrs", "fileDownloadTimeInHrs","uniqPodCount"
             ,"numFilesScanned", "avgFileSizeInMB", "IdleTimeInHrs"
             ,"cpu_used_avg", "memory_used_avg"
-            ,"taskq_max","tmp_taskq_avg", "linkerq_avg"
+            ,"task_queue_length_avg"
              ]
 
 title = 'Appliance plot for appliance_id '+appliance_id+' between '+fromDt+' and '+toDt
