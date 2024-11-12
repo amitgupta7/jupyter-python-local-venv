@@ -62,7 +62,8 @@ def checkDateRangeFromFileName(daterange, name):
 def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
     # dfp = fill_timeseries_zero_values(dfp)
     dfp = dfp[(dfp['metrics'].isin(cat_order))].drop_duplicates()
-    cat_order_overlap = sorted(set(cat_order).intersection(dfp.metrics.unique()),key=lambda x:cat_order.index(x))
+    cat_order_list = list(cat_order.keys())
+    cat_order_overlap = sorted(set(cat_order_list).intersection(dfp.metrics.unique()),key=lambda x:cat_order_list.index(x))
     dfp.rename(columns={colorCol:ledgend}, inplace=True)
     fig = px.bar(dfp, 
                  x='ts', 
@@ -81,11 +82,17 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
                  )
     fig.update_yaxes(matches=None)
     fig.update_traces(width=60*60*1000)
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.for_each_annotation(lambda a: a.update(text=updateCategoryLable(a.text, cat_order)))
     fromdt = dfp['ts'].min().date()
     todt=dfp['ts'].max().date()
     if todt > fromdt:
         fig.update_layout(xaxis=dict(
+            rangeselector=dict(
+                font = dict( color = "black"),
+                buttons=list([
+                dict(count=1, label="1d", step="day", stepmode="backward"),
+                dict(step="all")
+            ])),
             rangeslider=dict(
                 visible=True,
                 thickness=0.01
@@ -97,6 +104,11 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
     fig = fig.update_yaxes(side='left', showticklabels=True, title='')
     fig.update_layout(plot_bgcolor="black", font_color='white', paper_bgcolor='black')
     return fig
+
+def updateCategoryLable(txt, cat_order):
+    txt = txt.split("=")[-1]
+    return cat_order[txt]
+
 
 def fill_timeseries_zero_values(dfp):
     dfp = dfp.pivot_table(index=['appliance_id','ts'], columns=['node_ip', 'metrics'], values='value', aggfunc='max').reset_index()

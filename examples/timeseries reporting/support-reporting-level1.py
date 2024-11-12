@@ -46,14 +46,20 @@ dfp = df[(df['appliance_id'] == appliance_id)]
 # Get Full list of metrics in dataframe
 # metrics_category_order = list(dfp.metrics.unique())
 # Provide metrics to show from the data frame. Order is preserved.
-metrics_category_order = [
-            "dataScannedinGB"
-            ,"numberOfColsScanned", "numberOfChunksScanned"
-            ,"scanTimeInHrs", "fileDownloadTimeInHrs","uniqPodCount"
-            ,"numFilesScanned", "avgFileSizeInMB", "IdleTimeInHrs"
-            ,"cpu_used_avg", "memory_used_avg"
-            ,"task_queue_length_avg"
-             ]
+metrics_category_order = {# "Indicator": "Chart Description"
+            "uniqPodCount": "Scheduled Download workers by datasource"
+            ,"cpu_used_avg": "Average CPU by Appliance Node/VM"
+            , "memory_used_avg": "Average Memory by Appliance Node/VM"
+            , "fileDownloadTimeInHrs":  "Time spent by connectors in downloading files for scanning"
+            , "IdleTimeInHrs": "Cumulative time spent waiting by (all) download workers by datasource"
+            , "scanTimeInHrs":  "Cumulative time spent scanning by (all) download workers by datasource"
+            , "dataScannedinGB" :  "Data scanned in Gigabits per hour"
+            ,"numberOfColsScanned":  "Number of structured data columns scanned per hour"
+            , "numberOfChunksScanned":  "Number of structured data row chunks (of 64 rows) scanned per hour"
+            , "numFilesScanned":  "Number of files/tables scanned per hour"
+            , "avgFileSizeInMB":  "Average size of file or table scanned"
+            , "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download or scanning)"
+             }
 
 title = 'Appliance plot for appliance_id '+appliance_id+' between '+fromDt+' and '+toDt
 fig  = dfl.plotMetricsFacetForApplianceId(dfp, title, metrics_category_order, 'node_ip', 'GraphColor')
