@@ -19,8 +19,8 @@ reload(dfl)
 
 # Provide csv data location and appliance and timerange information.
 root = '../../.dataDir'
-fromDt = '2024-09-26'
-toDt = '2024-10-05'
+fromDt = '2024-11-10'
+toDt = '2024-12-10'
 
 # Provide list of prometheus metrics to load. 
 # metricsArr = ['cpu_used', 'download_workers_count', 'memory_used', 'task_queue_length', 'infra_access_latency', 'pod_cpu_usage', 'pod_memory_usage'] 
@@ -34,34 +34,43 @@ daterange=[fromDt, toDt]
 df = dfl.loadApplianceTimeSeriesData(root, metricsArr, daterange)
 
 
+# In[2]:
+
+
+display(df)
+print(df.metrics.unique())
+
+
 # ## Generate plotly report
 # * `appliance_id`: unique identifier of the appliance.
 
-# In[2]:
+# In[3]:
 
 
 reload(dfl)
 appliance_id='58e98e10-1b19-4c84-93c0-db2ad5903b80'
-dfp = df[(df['appliance_id'] == appliance_id)]
+fromDate = '2024-11-26'
+toDate = '2024-11-29'
+dfp = df[(df['appliance_id'] == appliance_id) & (df['ts'].between(fromDate, toDate))]
 # Get Full list of metrics in dataframe
-# metrics_category_order = list(dfp.metrics.unique())
+# print(dfp.metrics.unique())
 # Provide metrics to show from the data frame. Order is preserved.
 metrics_category_order = {# "Indicator": "Chart Description"
-            "uniqPodCount": "Scheduled Download workers by datasource"
+            "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download / scanning)"
             ,"cpu_used_avg": "Average CPU by Appliance Node/VM"
             , "memory_used_avg": "Average Memory by Appliance Node/VM"
+            ,"uniqPodCount": "Scheduled Download workers by datasource"
             , "fileDownloadTimeInHrs":  "Time spent by connectors in downloading files for scanning"
-            , "IdleTimeInHrs": "Cumulative time spent waiting by (all) download workers by datasource"
+            , "IdleTimeInHrs": "Cumulative idle-time spent waiting by (all) download workers by datasource"
             , "scanTimeInHrs":  "Cumulative time spent scanning by (all) download workers by datasource"
             , "dataScannedinGB" :  "Data scanned in Gigabits per hour"
             ,"numberOfColsScanned":  "Number of structured data columns scanned per hour"
             , "numberOfChunksScanned":  "Number of structured data row chunks (of 64 rows) scanned per hour"
             , "numFilesScanned":  "Number of files/tables scanned per hour"
-            , "avgFileSizeInMB":  "Average size of file or table scanned"
-            , "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download or scanning)"
+            , "avgFileSizeInMB":  "Average size of file or table-data scanned"
              }
 
-title = 'Appliance plot for appliance_id '+appliance_id+' between '+fromDt+' and '+toDt
-fig  = dfl.plotMetricsFacetForApplianceId(dfp, title, metrics_category_order, 'node_ip', 'GraphColor')
+title = 'Hourly appliance plot for appliance_id '+appliance_id
+fig  = dfl.plotMetricsFacetForApplianceId(dfp, title, metrics_category_order)
 fig.show()
 

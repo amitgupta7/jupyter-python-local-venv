@@ -59,12 +59,13 @@ def checkDateRangeFromFileName(daterange, name):
         return True
     return False
     
-def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
+def plotMetricsFacetForApplianceId(dfp, ttl, cat_order):
     # dfp = fill_timeseries_zero_values(dfp)
     dfp = dfp[(dfp['metrics'].isin(cat_order))].drop_duplicates()
     cat_order_list = list(cat_order.keys())
     cat_order_overlap = sorted(set(cat_order_list).intersection(dfp.metrics.unique()),key=lambda x:cat_order_list.index(x))
-    dfp.rename(columns={colorCol:ledgend}, inplace=True)
+    dfp.rename(columns={'node_ip':'legend'}, inplace=True)
+    ledgend = 'legend'
     fig = px.bar(dfp, 
                  x='ts', 
                  y="value", 
@@ -75,10 +76,12 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
                  height=dfp['metrics'].unique().size*200, 
                  facet_row_spacing=0.025, 
                 #  text_auto=True,
-                 text_auto='.1f',
-                 color_discrete_sequence=px.colors.qualitative.Alphabet, 
+                 text_auto='.2f',
+                #  color_discrete_sequence=px.colors.qualitative.Alphabet, 
                  category_orders={"metrics": cat_order_overlap}, 
-                 title=ttl
+                 title=ttl,
+                #  hover_name=ledgend,
+                 hover_data={'metrics':False, ledgend:True, 'ts':False, 'value':True}
                  )
     fig.update_yaxes(matches=None)
     fig.update_traces(width=60*60*1000)
@@ -88,6 +91,7 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
     if todt > fromdt:
         fig.update_layout(xaxis=dict(
             rangeselector=dict(
+                y=1,
                 font = dict( color = "black"),
                 buttons=list([
                 dict(count=1, label="1d", step="day", stepmode="backward"),
@@ -104,6 +108,8 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
     fig.for_each_xaxis(lambda x: x.update(showticklabels=True))
     fig = fig.update_yaxes(side='left', showticklabels=True, title='')
     fig.update_layout(plot_bgcolor="black", font_color='white', paper_bgcolor='black')
+    fig.for_each_trace(lambda t: t.update(legendgroup='group1', legendgrouptitle_text='Appliance Node') if '_' not in t.legendgroup else t.update(legendgroup='group2', legendgrouptitle_text='DataSystem'))
+    fig.update_layout(legend_title=None, hovermode="x")
     return fig
 
 def updateCategoryLable(txt, cat_order):
