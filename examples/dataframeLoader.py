@@ -40,7 +40,7 @@ def loadDataFrameFromFileRegex(root, regex, **kwargs):
             if fnmatch.fnmatch(name, regex) and os.path.getsize(os.path.join(path, name)) > 0:
                 if checkDateRangeFromFileName(daterange, name):
                     # print(os.path.join(path, name))
-                    df = pd.read_csv(os.path.join(path, name))
+                    df = pd.read_csv(os.path.join(path, name), on_bad_lines='warn')
                     df.insert(1, 'metrics', metrics)
                     df_arr.append(df)
     if not df_arr:
@@ -73,7 +73,7 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
                  facet_col='metrics', 
                  facet_col_wrap=1,
                  height=dfp['metrics'].unique().size*200, 
-                 facet_row_spacing=0.02, 
+                 facet_row_spacing=0.025, 
                 #  text_auto=True,
                  text_auto='.1f',
                  color_discrete_sequence=px.colors.qualitative.Alphabet, 
@@ -101,6 +101,7 @@ def plotMetricsFacetForApplianceId(dfp, ttl, cat_order, colorCol,ledgend):
                 range=[dfp['ts'].min(), dfp['ts'].min() + dt.timedelta(days=1)]
                 )
             )
+    fig.for_each_xaxis(lambda x: x.update(showticklabels=True))
     fig = fig.update_yaxes(side='left', showticklabels=True, title='')
     fig.update_layout(plot_bgcolor="black", font_color='white', paper_bgcolor='black')
     return fig
