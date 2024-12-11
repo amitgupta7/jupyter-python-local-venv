@@ -58,59 +58,75 @@ def checkDateRangeFromFileName(daterange, name):
     if start_timestamp <= parse(name,fuzzy=True) <= end_timestamp: 
         return True
     return False
+
+# Get Full list of metrics in dataframe
+# print(dfp.metrics.unique())
+# Provide metrics to show from the data frame. Order is preserved.
+cat_order = {# "Indicator": "Chart Description"
+            "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download / scanning)"
+            ,"cpu_used_avg": "Average CPU by Appliance Node/VM"
+            , "memory_used_avg": "Average Memory by Appliance Node/VM"
+            ,"uniqPodCount": "Scheduled Download workers by datasource"
+            , "fileDownloadTimeInHrs":  "Time spent by connectors in downloading files for scanning"
+            , "IdleTimeInHrs": "Cumulative idle-time spent waiting by (all) download workers by datasource"
+            , "scanTimeInHrs":  "Cumulative time spent scanning by (all) download workers by datasource"
+            , "dataScannedinGB" :  "Data scanned in Gigabits per hour"
+            ,"numberOfColsScanned":  "Number of structured data columns scanned per hour"
+            , "numberOfChunksScanned":  "Number of structured data row chunks (of 64 rows) scanned per hour"
+            , "numFilesScanned":  "Number of files/tables scanned per hour"
+            , "avgFileSizeInMB":  "Average size of file or table-data scanned"
+             }
+
     
-def plotMetricsFacetForApplianceId(dfp, ttl, cat_order):
+def plotMetricsFacetForApplianceId(dfp, appliance_id):
     # dfp = fill_timeseries_zero_values(dfp)
-    dfp = dfp[(dfp['metrics'].isin(cat_order))].drop_duplicates()
+    legend, metrics, ts = 'legend', 'metrics', 'ts'
+    dfp = dfp[(dfp['appliance_id'] == appliance_id) & (dfp[metrics].isin(cat_order))].drop_duplicates()
+    fromdt = dfp[ts].min()
+    todt=dfp[ts].max()
     cat_order_list = list(cat_order.keys())
     cat_order_overlap = sorted(set(cat_order_list).intersection(dfp.metrics.unique()),key=lambda x:cat_order_list.index(x))
-    dfp.rename(columns={'node_ip':'legend'}, inplace=True)
-    ledgend = 'legend'
+    title = f' TimeSeries plot for {appliance_id} between {fromdt:%d-%m-%Y} & {todt:%d-%m-%Y}'
     fig = px.bar(dfp, 
-                 x='ts', 
-                 y="value", 
-                 color=ledgend,
-                 pattern_shape=ledgend,
-                 facet_col='metrics', 
-                 facet_col_wrap=1,
-                 height=dfp['metrics'].unique().size*200, 
-                 facet_row_spacing=0.025, 
-                #  text_auto=True,
-                 text_auto='.2f',
+                 x=ts, y='value', 
+                 color=legend,pattern_shape=legend,
+                 facet_col=metrics, facet_col_wrap=1,
+                 height=dfp[metrics].unique().size*200, facet_row_spacing=0.025, 
+                 title=title, text_auto='.2f',
                 #  color_discrete_sequence=px.colors.qualitative.Alphabet, 
-                 category_orders={"metrics": cat_order_overlap}, 
-                 title=ttl,
-                #  hover_name=ledgend,
-                 hover_data={'metrics':False, ledgend:True, 'ts':False, 'value':True}
+                 category_orders={metrics: cat_order_overlap}, 
+                 hover_data={metrics:False, ts:False}
                  )
-    fig.update_yaxes(matches=None)
-    fig.update_traces(width=60*60*1000)
+    fig = updateFigureLayout(fromdt, todt, fig)
     fig.for_each_annotation(lambda a: a.update(text=updateCategoryLable(a.text, cat_order)))
-    fromdt = dfp['ts'].min().date()
-    todt=dfp['ts'].max().date()
+    return fig
+
+def updateFigureLayout(fromdt, todt, fig):
     if todt > fromdt:
         fig.update_layout(xaxis=dict(
             rangeselector=dict(
-                y=1,
-                font = dict( color = "black"),
+                y=1,font = dict( color = "black"),
                 buttons=list([
                 dict(count=1, label="1d", step="day", stepmode="backward"),
                 dict(step="all")
             ])),
             rangeslider=dict(
-                visible=True,
-                thickness=0.01
-                ),
-                type="date", 
-                range=[dfp['ts'].min(), dfp['ts'].min() + dt.timedelta(days=1)]
+                visible=True,thickness=0.01
+                ),type="date", range=[fromdt, fromdt + dt.timedelta(days=1)]
                 )
             )
     fig.for_each_xaxis(lambda x: x.update(showticklabels=True))
     fig = fig.update_yaxes(side='left', showticklabels=True, title='')
-    fig.update_layout(plot_bgcolor="black", font_color='white', paper_bgcolor='black')
-    fig.for_each_trace(lambda t: t.update(legendgroup='group1', legendgrouptitle_text='Appliance Node') if '_' not in t.legendgroup else t.update(legendgroup='group2', legendgrouptitle_text='DataSystem'))
-    fig.update_layout(legend_title=None, hovermode="x")
+    fig.update_layout(plot_bgcolor="black", font_color='white', 
+                      paper_bgcolor='black', legend_title=None, 
+                      hovermode="x", legend_tracegroupgap=50)
+    fig.update_yaxes(matches=None)
+    fig.update_traces(width=60*60*1000)
+    fig.for_each_trace(lambda t: formatLegend(t))
     return fig
+
+def formatLegend(t):
+    return t.update(legendgroup='group1', legendgrouptitle_text='Appliance Node') if '_' not in t.legendgroup else t.update(legendgroup='group2', legendgrouptitle_text='Data System')
 
 def updateCategoryLable(txt, cat_order):
     txt = txt.split("=")[-1]
@@ -206,4 +222,6 @@ def loadApplianceTimeSeriesData(root, metricsArr, daterange):
     df = pd.concat([df, dfus, dfst, dfsp], ignore_index=True)
     df['value'] = df.value.astype(float)
     df = df[(df.value > 0)]
+    df.rename(columns={'node_ip':'legend'}, inplace=True)
+
     return df
