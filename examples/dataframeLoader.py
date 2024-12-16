@@ -66,14 +66,14 @@ cat_order = {# "Indicator": "Chart Description"
             "cpu_used_avg": "Average CPU by Appliance Node/VM"
             , "memory_used_avg": "Average Memory by Appliance Node/VM"
             ,"uniqPodCount": "Scheduled Download workers by datasource"
-            , "fileDownloadTimeInHrs":  "Time spent by connectors in downloading files for scanning"
-            , "IdleTimeInHrs": "Cumulative idle-time spent waiting by (all) download workers by datasource"
-            , "scanTimeInHrs":  "Cumulative time spent scanning by (all) download workers by datasource"
-            , "dataScannedinGB" :  "Data scanned in Gigabits per hour"
+            , "fileDownloadTimeInHrs":  "CPU Time spent (in Hrs) by connectors in downloading files for scanning"
+            , "IdleTimeInHrs": "CPU Time spent Idle (in Hrs) by datasource"
+            , "scanTimeInHrs":  "CPU Time spent Scanning (in Hrs) by datasource"
+            , "dataScannedinGB" :  "Data scanned in Gigabyts per hour"
             ,"numberOfColsScanned":  "Number of structured data columns scanned per hour"
             , "numberOfChunksScanned":  "Number of structured data row chunks (of 64 rows) scanned per hour"
             , "numFilesScanned":  "Number of files/tables scanned per hour"
-            , "avgFileSizeInMB":  "Average size of file or table-data scanned"
+            , "avgFileSizeInMB":  "Average size of file or table-data scanned (in Mb)"
             , "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download / scanning)"
              }
 
@@ -106,8 +106,7 @@ def updateFigureLayout(fromdt, todt, fig):
     if todt > fromdt:
         fig.update_layout(xaxis=dict(
             rangeselector=dict(
-                y=1,font = dict( color = "black"),
-                buttons=list([
+                y=1,buttons=list([
                 dict(count=1, label="1d", step="day", stepmode="backward"),
                 dict(step="all")
             ])),
@@ -118,9 +117,9 @@ def updateFigureLayout(fromdt, todt, fig):
             )
     fig.for_each_xaxis(lambda x: x.update(showticklabels=True))
     fig = fig.update_yaxes(side='left', showticklabels=True, title='')
-    fig.update_layout(plot_bgcolor="black", font_color='white', 
-                      paper_bgcolor='black', legend_title=None, 
-                      hovermode="x", legend_tracegroupgap=50)
+    fig.update_layout(legend_title=None, hovermode="x", legend_tracegroupgap=50
+                    # plot_bgcolor="black", font_color='white', paper_bgcolor='black'
+                    )
     fig.update_yaxes(matches=None)
     fig.update_traces(width=60*60*1000)
     fig.for_each_trace(lambda t: formatLegend(t))
