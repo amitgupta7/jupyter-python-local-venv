@@ -63,8 +63,7 @@ def checkDateRangeFromFileName(daterange, name):
 # print(dfp.metrics.unique())
 # Provide metrics to show from the data frame. Order is preserved.
 cat_order = {# "Indicator": "Chart Description"
-            "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download / scanning)"
-            ,"cpu_used_avg": "Average CPU by Appliance Node/VM"
+            "cpu_used_avg": "Average CPU by Appliance Node/VM"
             , "memory_used_avg": "Average Memory by Appliance Node/VM"
             ,"uniqPodCount": "Scheduled Download workers by datasource"
             , "fileDownloadTimeInHrs":  "Time spent by connectors in downloading files for scanning"
@@ -75,6 +74,7 @@ cat_order = {# "Indicator": "Chart Description"
             , "numberOfChunksScanned":  "Number of structured data row chunks (of 64 rows) scanned per hour"
             , "numFilesScanned":  "Number of files/tables scanned per hour"
             , "avgFileSizeInMB":  "Average size of file or table-data scanned"
+            , "task_queue_length_avg":  "Average temporary task queue length (indicator of file tasks in queue for download / scanning)"
              }
 
     
@@ -98,7 +98,8 @@ def plotMetricsFacetForApplianceId(dfp, appliance_id):
                  hover_data={metrics:False, ts:False}
                  )
     fig = updateFigureLayout(fromdt, todt, fig)
-    fig.for_each_annotation(lambda a: a.update(text=updateCategoryLable(a.text, cat_order)))
+    fig.for_each_annotation(lambda a: a.update(text=updateCategoryLable(a.text, cat_order)
+                                    , hovertext = a.text.split("=")[-1]))
     return fig
 
 def updateFigureLayout(fromdt, todt, fig):
