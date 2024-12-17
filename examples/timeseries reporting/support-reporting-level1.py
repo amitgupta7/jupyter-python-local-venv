@@ -49,9 +49,9 @@ print(df.metrics.unique())
 
 reload(dfl)
 appliance_id='58e98e10-1b19-4c84-93c0-db2ad5903b80'
-fromDate = '2024-11-26'
+fromDate = '2024-11-23'
 toDate = '2024-11-29'
-dfp = df[(df['ts'].between(fromDate, toDate))]
+dfp = df[(df['ts'].between(fromDate, toDate, inclusive='both'))]
 fig  = dfl.plotMetricsFacetForApplianceId(dfp, appliance_id)
 fig.show()
 
